@@ -25,7 +25,7 @@ trait XHTMLWriter {
   def toXHTML( blocks : Seq[Block] ) : Node =
     Group( blocks.map( blockToXHTML(_) ) )
 
-  def blockToXHTML : Block => Node = block => block match {
+  def blockToXHTML(block: Block) : Node = block match {
     case Paragraph( spans, _ ) => paragraphToXHTML( spans )
     case Header( level, spans, _ ) => headerToXHTML( level, spans )
     case LinkDefinition( _, _, _, _ ) => Group( Nil )
@@ -39,7 +39,7 @@ trait XHTMLWriter {
     case HTMLBlock( content, _ ) => htmlBlockToXHTML( content )
   }
 
-  def htmlBlockToXHTML : String => Node = html => Unparsed( html )
+  def htmlBlockToXHTML(html: String): Node = Unparsed( html )
 
   def paragraphToXHTML : Seq[Span] => Node = spans => {
     def isHTML( s : Span ) = s match {
@@ -109,7 +109,7 @@ trait XHTMLWriter {
 
   def textToXHTML : String => Node = content => XMLText( unescape(content) )
 
-  def htmlSpanToXHTML : String => Node = html => Unparsed( html )
+  def htmlSpanToXHTML(html: String):  Node = Unparsed( html )
 
   def codeSpanToXHTML : String => Node = code => <code>{ code }</code>
 

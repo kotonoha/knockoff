@@ -12,15 +12,15 @@ scalacOptions <++= scalaVersion map {
 }
 
 crossScalaVersions := Seq(
-  "2.10.1", "2.10.0",
-  "2.9.2", "2.9.1-1", "2.9.1", "2.9.0-1", "2.9.0",
-  "2.8.2"
+  "2.10.1", "2.10.0"
 )
 
 libraryDependencies <+= scalaVersion {
   case sv if sv startsWith "2.10" => "org.scalatest" %% "scalatest" % "1.9" % "test"
   case _ => "org.scalatest" %% "scalatest" % "1.8" % "test"
 }
+
+libraryDependencies += "com.googlecode.owasp-java-html-sanitizer" % "owasp-java-html-sanitizer" % "r136"
 
 // Publishing setup to Sonatype's OSS hosting.
 //

@@ -806,14 +806,13 @@ extends Function1[ Chunk, Seq[Span] ] with StringExtras {
 
     val secondOpen = secondMatch.start(1)
 
-    var secondClose =
-      secondPart.findBalanced( '(', ')', secondOpen ).get
+    val secondClose = secondPart.findBalanced('(', ')', secondOpen).get
 
     if ( secondClose == -1 ) return None
 
-    var titleMatcher = """<?([\S&&[^)>]]*)>?[\t ]+"([^)]*)"""".r // "
+    val titleMatcher = """<?([\S&&[^)>]]*)>?[\t ]+"([^)]*)"""".r // "
 
-    var linkContent = secondPart.substring( secondOpen + 1, secondClose )
+    val linkContent = secondPart.substring(secondOpen + 1, secondClose)
 
     var titleOpt:Option[String] = None
     var url:String = ""
