@@ -16,12 +16,13 @@
 
 package com.tristanhunt.knockoff
 
-import org.owasp.html.{HtmlSanitizer, HtmlStreamEventReceiver, HtmlPolicyBuilder}
+import org.owasp.html.{ElementPolicy, HtmlSanitizer, HtmlStreamEventReceiver, HtmlPolicyBuilder}
 import java.util
 import scala.xml._
 import scala.collection.mutable
 import scala.xml.Group
 import scala.collection.mutable.ListBuffer
+import java.util.regex.Pattern
 
 /**
  * @author eiennohito
@@ -80,11 +81,24 @@ trait SanitizedXHTMLWriter { self: XHTMLWriter =>
   val blockParser = new ChunkParser
 
   val sanitizer = {
+    val number = Pattern.compile("\\d+")
+
+    val htmlClass = Pattern.compile("[a-zA-Z0-9\\s,\\-_]+")
+
     new HtmlPolicyBuilder()
-      .allowCommonBlockElements()
-      .allowCommonInlineFormattingElements()
-      .allowElements("tr", "td", "table", "thead", "tbody", "tfooter")
-      .allowAttributes("class").globally()
+      .allowElements(new ElementPolicy {
+        def apply(elementName: String, attrs: util.List[String]) = {
+          attrs.add("class")
+          attrs.add("table table-hover table-bordered")
+          elementName
+        }
+      }, "table")
+      .allowElements("tr", "td", "th", "thead", "tbody", "tfoot",
+      "pre", "div", "span", "code", "cite",
+      "b", "s", "i", "em", "strong")
+      .allowAttributes("colspan").matching(number).onElements("td")
+      .allowAttributes("rowspan").matching(number).onElements("td")
+      .allowAttributes("class").matching(htmlClass).globally()
       .toFactory
   }
 
