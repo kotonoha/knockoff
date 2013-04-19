@@ -134,8 +134,8 @@ class SpanConverterSpec extends Spec with ShouldMatchers {
     }
 
     it("should parse links ending in brackets") {
-      var text = """a [link](http://example.com/path_(foo))"""
-      var parsed = List( Text("a "),
+      val text = """a [link](http://example.com/path_(foo))"""
+      val parsed = List( Text("a "),
                          Link( List(Text("link")),
                                "http://example.com/path_(foo)",
                                None))

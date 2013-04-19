@@ -790,7 +790,7 @@ extends Function1[ Chunk, Seq[Span] ] with StringExtras {
   // Finds links in the format [name](link) for normal links or ![name](link)
   // for images.
   def findNormalMatch( source : String ) : Option[SpanMatch] = {
-    var imageIdx = source.indexOf('!')
+    val imageIdx = source.indexOf('!')
 
     val firstOpen = source.indexOf('[')
     if ( firstOpen == -1 ) return None
@@ -806,13 +806,15 @@ extends Function1[ Chunk, Seq[Span] ] with StringExtras {
 
     val secondOpen = secondMatch.start(1)
 
-    val secondClose = secondPart.findBalanced('(', ')', secondOpen).get
+    val secondClose = secondPart.findBalanced('(', ')', secondOpen)
 
-    if ( secondClose == -1 ) return None
+    if ( secondClose == None || secondClose.get == -1 ) return None
+
+    val secondPos = secondClose.get
 
     val titleMatcher = """<?([\S&&[^)>]]*)>?[\t ]+"([^)]*)"""".r // "
 
-    val linkContent = secondPart.substring(secondOpen + 1, secondClose)
+    val linkContent = secondPart.substring(secondOpen + 1, secondPos)
 
     var titleOpt:Option[String] = None
     var url:String = ""
@@ -840,7 +842,7 @@ extends Function1[ Chunk, Seq[Span] ] with StringExtras {
     val beforeOpt = if (start > 0) Some( Text( source.substring(0, start) ) )
                     else None
 
-    val close = firstClose + secondClose + 1
+    val close = firstClose + secondPos + 1
 
     val afterOpt = if (source.length > close + 1)
                       Some( source.substring(close + 1))
