@@ -20,29 +20,42 @@ package com.tristanhunt.knockoff
 
 import scala.io.{ Source }
 import scala.util.parsing.input.{ NoPosition, Position }
+import scala.xml.NodeSeq
+
+trait HaveUrl {
+  def url: String
+}
 
 trait Span
 
 case class Text( content : String ) extends Span
 case class HTMLSpan( html : String ) extends Span
+
+case class SanitizedHtmlSpan(nodes: NodeSeq,
+                             markdown: Map[String, Seq[Span]]) extends Span
+
 case class CodeSpan( content : String ) extends Span
 
 case class Strong( children : Seq[Span] ) extends Span
 case class Emphasis( children : Seq[Span] ) extends Span
 
 case class Link( children : Seq[Span], url : String, title : Option[String] )
-extends Span
+extends Span with HaveUrl
 
 case class IndirectLink( children : Seq[Span], definition : LinkDefinition )
-extends Span
+extends Span with HaveUrl {
+  def url = definition.url
+}
 
 case class ImageLink( children : Seq[Span], url : String,
                       title : Option[String] )
-extends Span
+extends Span with HaveUrl
 
 case class IndirectImageLink( children : Seq[Span],
                               definition : LinkDefinition )
-extends Span
+extends Span with HaveUrl {
+  def url = definition.url
+}
 
 case class Template(data: String) extends Span
 
@@ -85,6 +98,14 @@ extends Block
 
 case class HTMLBlock( html: String, position: Position )
 extends Block
+
+/**
+ * @param nodes parsed inline html. Inline markdown in it
+ *              is converted to `<span id=xxx ></span>`
+ * @param markdown inline markdown nodes in map id -> nodes
+ */
+case class SanitizedHtmlBlock(nodes: NodeSeq, markdown: Map[String, Seq[Span]],
+                              position: Position) extends Block
 
 case class OrderedList( items : Seq[OrderedItem] ) extends Block {
   lazy val position = if ( items.isEmpty ) NoPosition else items.head.position

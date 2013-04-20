@@ -21,7 +21,11 @@ trait Discounter extends ChunkStreamFactory with XHTMLWriter with TextWriter {
   /** Parses and returns our best guess at the sequence of blocks. It will
       never fail, just log all suspicious things. */
   def knockoff( source : java.lang.CharSequence ) : Seq[Block] = {
+    val (_, _, blocks) = knockoffWithLinkDefs(source)
+    blocks
+  }
 
+  def knockoffWithLinkDefs(source: CharSequence) = {
     val chunks = createChunkStream( new CharSequenceReader( source, 0 ) )
 
     // These next lines are really ugly because I couldn't figure out a nice
@@ -38,7 +42,8 @@ trait Discounter extends ChunkStreamFactory with XHTMLWriter with TextWriter {
       ( chunkAndPos._1, convert( chunkAndPos._1 ), chunkAndPos._2 )
     }
 
-    combine( spanned.toList, new ListBuffer )
+    val blocks = combine( spanned.toList, new ListBuffer )
+    (linkDefinitions, convert, blocks)
   }
 
   def createSpanConverter( linkDefinitions : Seq[LinkDefinitionChunk] ) : SpanConverter =
@@ -48,7 +53,7 @@ trait Discounter extends ChunkStreamFactory with XHTMLWriter with TextWriter {
       Chunk itself determines the "right thing to do". All chunks only know what
       has come before itself, by peering into the output. (It shouldn't matter
       what comes next...) */
-  private def combine( input : List[ (Chunk, Seq[Span], Position) ],
+  protected def combine( input : List[ (Chunk, Seq[Span], Position) ],
                        output : ListBuffer[Block] )
                      : Seq[ Block ] = {
     if ( input.isEmpty ) return output

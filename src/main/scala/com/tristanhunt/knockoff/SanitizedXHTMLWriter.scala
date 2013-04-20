@@ -41,7 +41,8 @@ class Level(val name: String, val attrs: MetaData) {
 
 class UnbalancedTagException(msg: String) extends RuntimeException(msg)
 
-class NodeSeqBuilder(writer: XHTMLWriter) extends HtmlStreamEventReceiver {
+trait NodeSeqConstructor extends HtmlStreamEventReceiver {
+
   def openDocument() {
     stack.push(new Level("div", Null))
   }
@@ -64,23 +65,22 @@ class NodeSeqBuilder(writer: XHTMLWriter) extends HtmlStreamEventReceiver {
     stack.head.append(item)
   }
 
+  val stack = new mutable.Stack[Level]()
+  def result: NodeSeq = stack.head.make.child
+}
+
+class NodeSeqBuilder(writer: XHTMLWriter) extends NodeSeqConstructor {
+
   def text(text: String) {
     val converter = new SpanConverter(Nil)
     val tree = converter(TextChunk(text))
     val nodes = tree.map(writer.spanToXHTML(_))
     stack.head.append(nodes)
   }
-
-  val stack = new mutable.Stack[Level]()
-
-  def result: NodeSeq = stack.head.make.child
 }
 
-trait SanitizedXHTMLWriter { self: XHTMLWriter =>
-
-  val blockParser = new ChunkParser
-
-  val sanitizer = {
+object Sanitizer {
+  def policyFactory = {
     val number = Pattern.compile("\\d+")
 
     val htmlClass = Pattern.compile("[a-zA-Z0-9\\s,\\-_]+")
@@ -101,6 +101,13 @@ trait SanitizedXHTMLWriter { self: XHTMLWriter =>
       .allowAttributes("class").matching(htmlClass).globally()
       .toFactory
   }
+}
+
+trait SanitizedXHTMLWriter { self: XHTMLWriter =>
+
+  val blockParser = new ChunkParser
+
+  val sanitizer = Sanitizer.policyFactory
 
   override def htmlSpanToXHTML(html: String): Node = {
     val bldr = new NodeSeqBuilder(this)
