@@ -1,6 +1,11 @@
 # [Knockoff - Markdown in Scala](http://tristanhunt.com/projects/knockoff) #
 
-This is a simple Markdown to object model to XHTML system.
+This is a fork of knockoff with some markdown extensions.
+
+1. Wiki links like `[[this]]`
+2. Template invocations like `{{this}}`
+3. Ability to use markdown inside html tags, but...
+4. Sanitizing inline html to *very* restrictive subset of it.
 
     import com.tristanhunt.knockoff.DefaultDiscounter._
 

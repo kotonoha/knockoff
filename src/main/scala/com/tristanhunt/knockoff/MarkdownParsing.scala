@@ -589,7 +589,7 @@ substring of that span.
 import scala.util.matching.Regex.Match
 
 class SpanConverter( definitions : Seq[LinkDefinitionChunk] )
-extends Function1[ Chunk, Seq[Span] ] with StringExtras {
+extends ((Chunk) => Seq[Span]) with StringExtras {
 
   /*
     The primary result returned by a `SpanMatcher`. It's `index` will become an
@@ -600,12 +600,12 @@ extends Function1[ Chunk, Seq[Span] ] with StringExtras {
 
 
   /** @param delim The delimiter string to match the next 2 sequences of.
-      @param toSpanMatch Factory to create the actual SpanMatch.
+      @param toSpan Factory to create the actual SpanMatch.
       @param recursive If you want the contained element to be reconverted.
       @param escape If set, how you can escape this sequence. */
   class DelimMatcher( delim : String, toSpan : Seq[Span] => Span,
                       recursive : Boolean, escape : Option[Char] )
-  extends Function1[ String, Option[SpanMatch] ] {
+  extends ((String) => Option[SpanMatch]) {
 
     def apply( source : String ) : Option[SpanMatch] = {
 
@@ -620,6 +620,27 @@ extends Function1[ Chunk, Seq[Span] ] with StringExtras {
           val mapped = toSpan( content )
           Some( SpanMatch( start, before, mapped, after ) )
         case _ => None
+      }
+    }
+  }
+
+  class ParenLikeMatcher(left: String, right: String, toSpan: String => Span)
+  extends (String => Option[SpanMatch]) {
+    def apply(in: String): Option[SpanMatch] = {
+      val start = in.indexOf(left)
+      if (start == -1) return None
+      val end = in.findBalanced(left, right, start)
+      end match {
+        case None => None
+        case Some(-1) => None
+        case Some(x) if start + left.length >= x => None
+        case Some(end) =>
+          val before = in.substringOption(0, start).map { Text(_) }
+          val inner = in.substring(start + left.length, end)
+          val after = in.substringOption(end + right.length, in.length)
+          val content = toSpan(inner)
+          val span = SpanMatch(start, before, content, after)
+          Some(span)
       }
     }
   }
@@ -655,12 +676,13 @@ extends Function1[ Chunk, Seq[Span] ] with StringExtras {
     }
   }
 
-  def matchers : List[ String => Option[SpanMatch] ] = List(
+  def matchers : Seq[ String => Option[SpanMatch] ] = Seq(
     matchDoubleCodes, matchSingleCodes, findReferenceMatch, findAutomaticMatch,
     findNormalMatch, matchHTMLComment,
     matchEntity, matchHTMLSpan, matchUnderscoreStrongAndEm,
     matchAsterixStrongAndEm, matchUnderscoreStrong, matchAsterixStrong,
-    matchUnderscoreEmphasis, matchAsterixEmphasis
+    matchUnderscoreEmphasis, matchAsterixEmphasis,
+    wikiLinkMatcher, templateMatcher
   )
 
   val matchUnderscoreEmphasis =
@@ -693,6 +715,11 @@ extends Function1[ Chunk, Seq[Span] ] with StringExtras {
     new DelimMatcher( "`", s => CodeSpan( s.head.asInstanceOf[Text].content ),
                       false, None )
 
+  val wikiLinkMatcher =
+    new ParenLikeMatcher("[[", "]]", s => Link(List(Text(s)), s, Some(s)))
+
+  val templateMatcher =
+    new ParenLikeMatcher("{{", "}}", s => Template(s))
 
   /*
 

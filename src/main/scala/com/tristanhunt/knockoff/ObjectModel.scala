@@ -44,6 +44,8 @@ case class IndirectImageLink( children : Seq[Span],
                               definition : LinkDefinition )
 extends Span
 
+case class Template(data: String) extends Span
+
 
 /*
 

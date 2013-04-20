@@ -53,6 +53,13 @@ trait StringExtras {
       if ( (nextOpen == -1) || (wrapped.length == nextOpen + 1) ) return None
       findBalancedClose( 1, open, close, start + 1 )
     }
+
+    /** Locates proper parenthetical sequences in a string. */
+    def findBalanced( open : String, close : String, start : Int ) : Option[Int] = {
+      val nextOpen = wrapped.indexOf( open, start )
+      if ( (nextOpen == -1) || (wrapped.length == nextOpen + 1) ) return None
+      findBalancedClose( 1, open, close, start + 1 )
+    }
       
     /** Recursive method for paren matching that is initialized by
         findBalanced. */
@@ -70,6 +77,32 @@ trait StringExtras {
       if ( (nextOpen != - 1) && (nextOpen < nextClose) )
         return findBalancedClose( count + 1, open, close, nextOpen + 1 )
       
+      // We have a balanced close, but not everything is done
+      if ( count > 1 )
+        return findBalancedClose( count - 1, open, close, nextClose + 1 )
+
+      // Everything is balanced
+      Some( nextClose )
+    }
+
+    /**
+     * Recursive method for paren matching that is initialized by findBalanced.
+     * This version is specialized for strings.
+     */
+    private def findBalancedClose( count : Int, open : String, close : String,
+                                   index : Int )
+                                 : Option[Int] = {
+      if ( wrapped.length <= index ) return None
+
+      val nextOpen  = wrapped.indexOf( open, index )
+      val nextClose = wrapped.indexOf( close, index )
+
+      if ( nextClose == -1 ) return None
+
+      // We find another unbalanced open
+      if ( (nextOpen != - 1) && (nextOpen < nextClose) )
+        return findBalancedClose( count + 1, open, close, nextOpen + 1 )
+
       // We have a balanced close, but not everything is done
       if ( count > 1 )
         return findBalancedClose( count - 1, open, close, nextClose + 1 )

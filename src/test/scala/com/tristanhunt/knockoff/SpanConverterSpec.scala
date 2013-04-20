@@ -1,12 +1,8 @@
 package com.tristanhunt.knockoff
 
-//import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest._
 import org.scalatest.matchers._
-import scala.util.parsing.input.NoPosition
 
-//@RunWith(classOf[JUnitRunner])
 class SpanConverterSpec extends Spec with ShouldMatchers {
 
   def convert( txt : String ) : List[Span] = convert( txt, Nil )
@@ -65,11 +61,13 @@ class SpanConverterSpec extends Spec with ShouldMatchers {
     it("should wrap a <span> that contains another <span>") {
       val txt = """a <span class="container">contains <span>something</span>
                   | else</span> without a problem <br /> !""".stripMargin
-      convert( txt ) should equal {
-        List( Text("a "),
-              HTMLSpan( """<span class="container">contains """ +
-                        "<span>something</span>\n else</span>" ),
-              Text(" without a problem "), HTMLSpan("<br />"), Text(" !") ) }
+      val res = List(Text("a "),
+        HTMLSpan(
+          """<span class="container">contains <span>something</span>
+            | else</span>""".stripMargin),
+        Text(" without a problem "), HTMLSpan("<br />"), Text(" !"))
+      val out = convert(txt)
+      out should be (res)
     }
 
     it("should find a couple of entities and pass them through") {
@@ -140,6 +138,23 @@ class SpanConverterSpec extends Spec with ShouldMatchers {
                                "http://example.com/path_(foo)",
                                None))
       convert(text) should equal (parsed)
+    }
+
+    it("should parse wiki-style links") {
+      val text = "please see [[tags]] for more examples"
+      val out = List(Text("please see "),
+        Link(List(Text("tags")),"tags",Some("tags")),
+        Text(" for more examples"))
+      val result = convert(text)
+      result should be (out)
+    }
+
+    it("should parse template invocations") {
+      val src = "i am a {{template}} invocation."
+      val out = convert(src)
+      val target = List(Text("i am a "),
+                Template("template"), Text(" invocation."))
+      out should equal (target)
     }
   }
 }
