@@ -72,7 +72,7 @@ class SanitizationListener(sink: SanitizationEvent => Unit) {
 object SanitizationChangeSupport {
   private[knockoff] object listener extends DynamicVariable[SanitizationListener] (null)
 
-  def withSink[T](sink: SanitizationEvent => Unit)(f: => T) {
+  def withSink[T](sink: SanitizationEvent => Unit)(f: => T): T = {
     val lst = new SanitizationListener(sink)
     listener.withValue(lst)(f)
   }
