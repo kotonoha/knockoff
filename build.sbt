@@ -4,7 +4,7 @@ organization := "com.tristanhunt"
 
 version := "0.8.1"
 
-scalaVersion := "2.10.1"
+scalaVersion := "2.10.2"
 
 scalacOptions <++= scalaVersion map {
   case sv if sv startsWith "2.10" => Seq("-language:implicitConversions")
