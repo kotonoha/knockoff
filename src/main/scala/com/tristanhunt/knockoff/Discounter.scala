@@ -12,9 +12,8 @@ you can use the `DefaultDiscounter` object.
 package com.tristanhunt.knockoff
 
 import scala.collection.mutable.ListBuffer
-import scala.util.parsing.input.Position
-import scala.util.parsing.input.CharSequenceReader
-import scala.xml.{ Group, Node }
+import scala.io.StdIn
+import scala.util.parsing.input.{CharSequenceReader, Position}
 
 trait Discounter extends ChunkStreamFactory with XHTMLWriter with TextWriter {
 
@@ -79,9 +78,8 @@ The `--html4tags` argument will just do nothing, but not be processed as a file.
 */
 
 import java.io.File
-import scala.util.logging.ConsoleLogger
 
-object DefaultDiscounter extends Discounter with ConsoleLogger {
+object DefaultDiscounter extends Discounter {
   def main( args : Array[String] ) : Unit = try {
     if ( args.contains("--version") ) {
       Console.err.print( "DefaultDiscounter " )
@@ -95,7 +93,7 @@ object DefaultDiscounter extends Discounter with ConsoleLogger {
       val sb = new StringBuilder
       var line : String = null
       do {
-        line = Console.readLine
+        line = StdIn.readLine
         if ( line != null ) sb.append( line )
       } while ( line != null )
       println( toXHTML( knockoff( sb.toString ) ).toString )

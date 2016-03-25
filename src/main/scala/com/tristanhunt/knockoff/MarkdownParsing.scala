@@ -46,11 +46,11 @@ any errors in the document if possible. Errors are logged and we move ahead.
 
 package com.tristanhunt.knockoff
 
-import scala.util.parsing.combinator.Parsers
-import scala.util.parsing.input.{ CharSequenceReader, Position, Reader }
-import scala.util.logging.Logged
+import com.typesafe.scalalogging.StrictLogging
 
-trait ChunkStreamFactory extends Logged {
+import scala.util.parsing.input.{CharSequenceReader, Position, Reader}
+
+trait ChunkStreamFactory extends StrictLogging {
 
   /** Overridable factory method. */
   def newChunkParser : ChunkParser = new ChunkParser
@@ -64,13 +64,13 @@ trait ChunkStreamFactory extends Logged {
     if ( reader.atEnd ) return Stream.empty
     chunkParser.parse( chunkParser.chunk, reader ) match {
       case chunkParser.Error( msg, next ) => {
-        log( msg )
-        log( "next == reader : " + (next == reader) )
+        logger.trace( msg )
+        logger.trace( "next == reader : " + (next == reader) )
         createChunkStream( next )
       }
       case chunkParser.Failure( msg, next ) => {
-        log( msg )
-        log( "next == reader : " + (next == reader) )
+        logger.trace( msg )
+        logger.trace( "next == reader : " + (next == reader) )
         createChunkStream( next )
       }
       case chunkParser.Success( result, next ) => {
@@ -300,7 +300,7 @@ we've grabbed the spanning elements of each block, to construct the final
 
 */
 
-import scala.collection.mutable.{ Buffer, ListBuffer }
+import scala.collection.mutable.ListBuffer
 
 trait Chunk {
   def content : String
@@ -585,8 +585,6 @@ converter configures that matcher to kick off another parsing run on the
 substring of that span.
 
 */
-
-import scala.util.matching.Regex.Match
 
 class SpanConverter( definitions : Seq[LinkDefinitionChunk] )
 extends ((Chunk) => Seq[Span]) with StringExtras {

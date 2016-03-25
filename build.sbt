@@ -4,21 +4,24 @@ organization := "com.tristanhunt"
 
 version := "0.8.1"
 
-scalaVersion := "2.10.2"
+scalaVersion := "2.11.8"
 
 scalacOptions <++= scalaVersion map {
   case sv if sv startsWith "2.10" => Seq("-language:implicitConversions")
   case _ => Nil
 }
 
-crossScalaVersions := Seq(
-  "2.10.1", "2.10.0"
+libraryDependencies <+= scalaVersion {
+  case sv if sv startsWith "2.11" => "org.scalatest" %% "scalatest" % "2.2.1" % "test"
+  case _ => "org.scalatest" %% "scalatest" % "1.9" % "test"
+}
+
+libraryDependencies ++= Seq(
+  "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
 )
 
-libraryDependencies <+= scalaVersion {
-  case sv if sv startsWith "2.10" => "org.scalatest" %% "scalatest" % "1.9" % "test"
-  case _ => "org.scalatest" %% "scalatest" % "1.8" % "test"
-}
+libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"
 
 libraryDependencies += "com.googlecode.owasp-java-html-sanitizer" % "owasp-java-html-sanitizer" % "r136"
 
