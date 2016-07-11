@@ -1,8 +1,8 @@
 name := "knockoff"
 
-organization := "com.tristanhunt"
+organization := "ws.kotonoha"
 
-version := "0.8.1"
+version := "0.8.2-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 
@@ -12,7 +12,7 @@ scalacOptions <++= scalaVersion map {
 }
 
 libraryDependencies <+= scalaVersion {
-  case sv if sv startsWith "2.11" => "org.scalatest" %% "scalatest" % "2.2.1" % "test"
+  case sv if sv startsWith "2.11" => "org.scalatest" %% "scalatest" % "2.2.6" % Test
   case _ => "org.scalatest" %% "scalatest" % "1.9" % "test"
 }
 
@@ -21,7 +21,7 @@ libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
 )
 
-libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"
+libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.4.0"
 
 libraryDependencies += "com.googlecode.owasp-java-html-sanitizer" % "owasp-java-html-sanitizer" % "r136"
 
