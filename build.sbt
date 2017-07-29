@@ -21,7 +21,7 @@ libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
 )
 
-libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.4.0"
+libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2"
 
 libraryDependencies += "com.googlecode.owasp-java-html-sanitizer" % "owasp-java-html-sanitizer" % "r136"
 
