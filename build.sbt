@@ -6,15 +6,15 @@ version := "0.8.2-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 
-scalacOptions <++= scalaVersion map {
+scalacOptions ++= (scalaVersion.value match {
   case sv if sv startsWith "2.10" => Seq("-language:implicitConversions")
   case _ => Nil
-}
+})
 
-libraryDependencies <+= scalaVersion {
+libraryDependencies += (scalaVersion.value match {
   case sv if sv startsWith "2.11" => "org.scalatest" %% "scalatest" % "2.2.6" % Test
   case _ => "org.scalatest" %% "scalatest" % "1.9" % "test"
-}
+})
 
 libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
